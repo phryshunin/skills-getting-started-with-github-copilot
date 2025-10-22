@@ -14,22 +14,10 @@ document.addEventListener("DOMContentLoaded", () => {
       activitiesList.innerHTML = "";
 
       // Populate activities list
+      renderActivities(activities);
+
+      // Add option to select dropdown
       Object.entries(activities).forEach(([name, details]) => {
-        const activityCard = document.createElement("div");
-        activityCard.className = "activity-card";
-
-        const spotsLeft = details.max_participants - details.participants.length;
-
-        activityCard.innerHTML = `
-          <h4>${name}</h4>
-          <p>${details.description}</p>
-          <p><strong>Schedule:</strong> ${details.schedule}</p>
-          <p><strong>Availability:</strong> ${spotsLeft} spots left</p>
-        `;
-
-        activitiesList.appendChild(activityCard);
-
-        // Add option to select dropdown
         const option = document.createElement("option");
         option.value = name;
         option.textContent = name;
@@ -39,6 +27,59 @@ document.addEventListener("DOMContentLoaded", () => {
       activitiesList.innerHTML = "<p>Failed to load activities. Please try again later.</p>";
       console.error("Error fetching activities:", error);
     }
+  }
+
+  // Function to render activities
+  function renderActivities(activities) {
+    const activitiesList = document.getElementById("activities-list");
+    activitiesList.innerHTML = "";
+
+    if (!activities.length) {
+      activitiesList.innerHTML = '<p>No activities available.</p>';
+      return;
+    }
+
+    activities.forEach(activity => {
+      const card = document.createElement('div');
+      card.className = 'activity-card';
+
+      const spotsLeft = activity.max_participants - activity.participants.length;
+
+      card.innerHTML = `
+        <h4>${activity.name}</h4>
+        <p>${activity.description}</p>
+        <p><strong>Schedule:</strong> ${activity.schedule}</p>
+        <p><strong>Availability:</strong> ${spotsLeft} spots left</p>
+      `;
+
+      // Participants section
+      const participantsSection = document.createElement('div');
+      participantsSection.className = 'activity-participants';
+
+      const participantsTitle = document.createElement('h5');
+      participantsTitle.textContent = 'Participants';
+
+      const participantsList = document.createElement('ul');
+      if (activity.participants && activity.participants.length > 0) {
+        activity.participants.forEach(participant => {
+          const li = document.createElement('li');
+          li.textContent = participant;
+          participantsList.appendChild(li);
+        });
+      } else {
+        const li = document.createElement('li');
+        li.textContent = 'No participants yet.';
+        li.style.color = '#888';
+        participantsList.appendChild(li);
+      }
+
+      participantsSection.appendChild(participantsTitle);
+      participantsSection.appendChild(participantsList);
+
+      card.appendChild(participantsSection);
+
+      activitiesList.appendChild(card);
+    });
   }
 
   // Handle form submission
